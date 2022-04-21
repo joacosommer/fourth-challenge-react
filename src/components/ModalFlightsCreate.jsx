@@ -1,17 +1,9 @@
-import { useState } from "react";
 import { useQuery } from "react-query";
 import Dropdown from "./Dropdown";
 import axios from "axios";
 import DateTimePicker from "react-datetime-picker";
 
 export default function ModalFlightsCreate(props) {
-  const [airline, setAirline] = useState();
-  const [origin, setOrigin] = useState();
-  const [destination, setDestination] = useState();
-
-  const [departureDate, setDepartureDate] = useState();
-  const [arrivalDate, setArrivalDate] = useState();
-
   function fetchAirlines() {
     const airlinesPromise = axios.get("http://127.0.0.1:8000/api/airline");
     return airlinesPromise;
@@ -24,27 +16,6 @@ export default function ModalFlightsCreate(props) {
     isSuccess,
   } = useQuery("airlines", fetchAirlines);
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    const flight = {
-      airline: airline.id,
-      origin: origin.id,
-      destination: destination.id,
-      departureDate: departureDate,
-      arrivalDate: arrivalDate,
-    };
-    axios
-      .post("http://127.0.0.1:8000/api/flight", flight)
-      .then((response) => {
-        props.setShowModal(false);
-        // console.log(response.data.flight);
-        props.addFlight(response.data.flight);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
-
   return (
     <>
       {props.showModal ? (
@@ -55,15 +26,9 @@ export default function ModalFlightsCreate(props) {
               <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
                 {/*header*/}
                 <div className="flex items-start justify-between p-5 border-b border-solid border-slate-200 rounded-t">
-                  <h3 className="text-2xl font-semibold">Add Flight</h3>
-                  <button
-                    className="p-1 ml-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
-                    onClick={() => props.setShowModal(false)}
-                  >
-                    <span className="bg-transparent text-black opacity-5 h-6 w-6 text-2xl block outline-none focus:outline-none">
-                      ×
-                    </span>
-                  </button>
+                  <h3 className="text-2xl font-semibold">
+                    {!props.editFlight ? "Add Flight" : "Edit Flight"}
+                  </h3>
                 </div>
 
                 {/*body*/}
@@ -73,31 +38,31 @@ export default function ModalFlightsCreate(props) {
                     <Dropdown
                       data={airlines.data}
                       text="Airline"
-                      selectedData={airline}
-                      setSelectedData={setAirline}
+                      selectedData={props.airline}
+                      setSelectedData={props.setAirline}
                     />
                   )}
                   {isError && <div>{error.message}</div>}
                   {isSuccess && (
                     <Dropdown
-                      data={airline ? airline.cities : []}
+                      data={props.airline ? props.airline.cities : []}
                       text="Origin"
-                      selectedData={origin}
-                      setSelectedData={setOrigin}
+                      selectedData={props.origin}
+                      setSelectedData={props.setOrigin}
                     />
                   )}
                   {isSuccess && (
                     <Dropdown
                       data={
-                        airline && origin
-                          ? airline.cities.filter(
-                              (city) => city.id !== origin.id
+                        props.airline && props.origin
+                          ? props.airline.cities.filter(
+                              (city) => city.id !== props.origin.id
                             )
                           : []
                       }
                       text="Destination"
-                      selectedData={destination}
-                      setSelectedData={setDestination}
+                      selectedData={props.destination}
+                      setSelectedData={props.setDestination}
                     />
                   )}
                   <label htmlFor="block text-sm font-s text-gray-700">
@@ -105,8 +70,8 @@ export default function ModalFlightsCreate(props) {
                   </label>
                   <div className="mt-1">
                     <DateTimePicker
-                      onChange={setDepartureDate}
-                      value={departureDate}
+                      onChange={props.setDepartureDate}
+                      value={props.departureDate}
                       disableClock={true}
                     />
                   </div>
@@ -115,41 +80,55 @@ export default function ModalFlightsCreate(props) {
                   </label>
                   <div className="mt-1">
                     <DateTimePicker
-                      onChange={setArrivalDate}
-                      value={arrivalDate}
-                      disabled={!departureDate}
+                      onChange={props.setArrivalDate}
+                      value={props.arrivalDate}
+                      disabled={!props.departureDate}
                       disableClock={true}
-                      minDate={departureDate}
+                      minDate={props.departureDate}
                     />
                   </div>
-                  {arrivalDate && departureDate && arrivalDate < departureDate && (
-                    <div>
-                      <div className="text-red-500 text-sm">
-                        Arrival date must be after departure date
+                  {props.arrivalDate &&
+                    props.departureDate &&
+                    props.arrivalDate < props.departureDate && (
+                      <div>
+                        <div className="text-red-500 text-sm">
+                          Arrival date must be after departure date
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                 </div>
                 {/*footer*/}
                 <div className="flex items-center justify-end p-6 border-t border-solid border-slate-200 rounded-b">
                   <button
                     className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                     type="button"
-                    onClick={() => props.setShowModal(false)}
+                    onClick={() => {
+                      props.setShowModal(false);
+                      props.setEditFlight();
+                      props.setAirline();
+                      props.setOrigin();
+                      props.setDestination();
+                      props.setDepartureDate();
+                      props.setArrivalDate();
+                    }}
                   >
                     Close
                   </button>
                   <button
                     className="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                     type="button"
-                    onClick={(event) => handleSubmit(event)}
+                    onClick={
+                      !props.editFlight
+                        ? (event) => props.handleSubmit(event)
+                        : (event) => props.handleEditSubmit(event)
+                    }
                     disabled={
-                      !arrivalDate ||
-                      !departureDate ||
-                      !airline ||
-                      !origin ||
-                      !destination ||
-                      arrivalDate < departureDate
+                      !props.arrivalDate ||
+                      !props.departureDate ||
+                      !props.airline ||
+                      !props.origin ||
+                      !props.destination ||
+                      props.arrivalDate < props.departureDate
                     }
                   >
                     Save Changes

@@ -88,7 +88,11 @@ export default function Tabla(props) {
                         </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <button
-                            href="#"
+                            onClick={() => {
+                              props.setShowModal(true);
+                              props.setEditFlight(val);
+                              props.setFlightData(val);
+                            }}
                             className="text-indigo-600 hover:text-indigo-900 px-3 "
                           >
                             Edit<span className="sr-only">, {val.id}</span>
