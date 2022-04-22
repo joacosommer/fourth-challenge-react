@@ -19,6 +19,7 @@ function App() {
   const [arrivalDate, setArrivalDate] = useState();
 
   const [editFlight, setEditFlight] = useState();
+  const [deleteFlight, setDeleteFlight] = useState();
 
   function setFlightData(flight) {
     setAirline(flight.airline);
@@ -26,6 +27,26 @@ function App() {
     setDestination(flight.destination);
     setDepartureDate(new Date(flight.departureDate));
     setArrivalDate(new Date(flight.arrivalDate));
+  }
+
+  function handleDeleteSubmit(event) {
+    event.preventDefault();
+    axios
+      .delete(`http://127.0.0.1:8000/api/delete-flight/${deleteFlight}`)
+      .then((res) => {
+        setFlights(flights.filter((flight) => flight.id !== deleteFlight));
+        // setCurrentPage(1);
+        // fetchFlights(currentPage);
+        setShowModal(false);
+        setEditFlight();
+        setAirline();
+        setOrigin();
+        setDestination();
+        setDepartureDate();
+        setArrivalDate();
+        setDeleteFlight(false);
+      })
+      .catch((err) => console.log(err));
   }
 
   function handleEditSubmit(event) {
@@ -148,12 +169,12 @@ function App() {
           isLoading={isLoading}
           setEditFlight={setEditFlight}
           setFlightData={setFlightData}
+          setDeleteFlight={setDeleteFlight}
         />
 
         {showModal && (
           <ModalFlightsCreate
             addFlight={addFlight}
-            showModal={showModal}
             setShowModal={setShowModal}
             handleSubmit={handleSubmit}
             handleEditSubmit={handleEditSubmit}
@@ -169,6 +190,9 @@ function App() {
             arrivalDate={arrivalDate}
             editFlight={editFlight}
             setEditFlight={setEditFlight}
+            deleteFlight={deleteFlight}
+            setDeleteFlight={setDeleteFlight}
+            handleDeleteSubmit={handleDeleteSubmit}
           />
         )}
       </div>

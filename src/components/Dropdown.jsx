@@ -21,6 +21,7 @@ export default function Dropdown(props) {
       as="div"
       value={props.selectedData}
       onChange={props.setSelectedData}
+      disabled={props.disabled}
     >
       <Combobox.Label className="block text-sm font-medium text-gray-700">
         {props.text}
