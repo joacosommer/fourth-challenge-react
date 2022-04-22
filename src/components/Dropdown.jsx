@@ -8,7 +8,6 @@ function classNames(...classes) {
 
 export default function Dropdown(props) {
   const [query, setQuery] = useState("");
-  // const [selectedData, setSelectedData] = useState();
 
   const filteredData =
     query === ""
@@ -17,12 +16,12 @@ export default function Dropdown(props) {
           return data.name.toLowerCase().includes(query.toLowerCase());
         });
 
-  // console.log(selectedData);
   return (
     <Combobox
       as="div"
       value={props.selectedData}
       onChange={props.setSelectedData}
+      disabled={props.disabled}
     >
       <Combobox.Label className="block text-sm font-medium text-gray-700">
         {props.text}

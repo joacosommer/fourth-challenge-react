@@ -25,6 +25,7 @@ export default function Tabla(props) {
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+              {props.isLoading && <div>Loading...</div>}
               <table className="min-w-full divide-y divide-gray-300">
                 <thead className="bg-gray-50">
                   <tr>
@@ -67,7 +68,6 @@ export default function Tabla(props) {
                   </tr>
                 </thead>
                 <tbody className="bg-white">
-                  {props.isLoading && <div>Loading...</div>}
                   {props.isSuccess &&
                     props.flights.map((val, key) => (
                       <tr key={key}>
@@ -88,13 +88,22 @@ export default function Tabla(props) {
                         </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <button
-                            href="#"
+                            onClick={() => {
+                              props.setShowModal(true);
+                              props.setEditFlight(val);
+                              props.setFlightData(val);
+                            }}
                             className="text-indigo-600 hover:text-indigo-900 px-3 "
                           >
                             Edit<span className="sr-only">, {val.id}</span>
                           </button>
                           <button
-                            href="#"
+                            onClick={() => {
+                              props.setShowModal(true);
+                              props.setDeleteFlight(val.id);
+                              // props.setEditFlight(val);
+                              props.setFlightData(val);
+                            }}
                             className="text-indigo-600 hover:text-indigo-900"
                           >
                             Delete<span className="sr-only">, {val.id}</span>
